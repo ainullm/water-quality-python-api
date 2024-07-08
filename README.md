@@ -1,1 +1,1 @@
-# water-quality-python-api
+# Water Quailty Check API
