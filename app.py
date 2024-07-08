@@ -1,18 +1,20 @@
 from flask import Flask, jsonify, request
 import numpy as np
+import random
+from time import sleep
 
 app = Flask(__name__)
 
 # Initialize threshold values with defaults
 thresholds = {
-    "suhu_min": 26,
-    "suhu_max": 35,
-    "do_min": 3,
+    "suhu_min": 28,
+    "suhu_max": 32,
+    "do_min": 4,
     "do_max": 10,
-    "ph_min": 7,
+    "ph_min": 7.5,
     "ph_max": 8.5,
-    "salinitas_min": 0,
-    "salinitas_max": 35
+    "salinitas_min": 5,
+    "salinitas_max": 40
 }
 
 def defuzzify_tfns(tfns):
@@ -91,6 +93,64 @@ def assess_quality():
     }
 
     return jsonify(response)
+
+# @app.route('/get-monitoring', methods=['GET'])
+# def monitoring_dummy():
+#     # Simulasi data acak
+#     suhu = random.uniform(28, 32)
+#     salinitas = random.uniform(5, 40)
+#     ph = random.uniform(7.5, 8.5)
+#     oksigen = random.uniform(3, 10)
+
+#     # Buat dictionary data
+#     data = {
+#         "suhu": suhu,
+#         "salinitas": salinitas,
+#         "ph": ph,
+#         "oksigen": oksigen
+#     }
+
+#     # Kembalikan data dalam format JSON
+#     return jsonify(data)
+
+
+@app.route('/get-monitoring', methods=['GET'])
+def get_data():
+    # Initialize variables
+    current_temperature = 29
+    current_salinity = 20
+    current_ph = 8
+    current_oxygen = 5
+
+    # Generate random fluctuations with a bias
+    temperature_change = random.uniform(-0.5, 0.5)
+    salinity_change = random.uniform(-1, 1)
+    ph_change = random.uniform(-0.1, 0.1)
+    oxygen_change = random.uniform(-0.2, 0.2)
+
+    # Update values with fluctuations
+    new_temperature = current_temperature + temperature_change
+    new_salinity = max(5, min(current_salinity + salinity_change, 40))
+    new_ph = max(7.5, min(current_ph + ph_change, 8.5))
+    new_oxygen = max(3, min(current_oxygen + oxygen_change, 10))
+
+    # Update current values
+    current_temperature = new_temperature
+    current_salinity = new_salinity
+    current_ph = new_ph
+    current_oxygen = new_oxygen
+
+    # Create data dictionary
+    data = {
+        "suhu": current_temperature,
+        "salinitas": current_salinity,
+        "ph": current_ph,
+        "do": current_oxygen
+    }
+
+    # Return data in JSON format
+    return jsonify(data)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
